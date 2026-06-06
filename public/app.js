@@ -1,5 +1,6 @@
 const requestText = document.querySelector("#requestText");
 const recordButton = document.querySelector("#recordButton");
+const randomButton = document.querySelector("#randomButton");
 const refineButton = document.querySelector("#refineButton");
 const generateButton = document.querySelector("#generateButton");
 const summary = document.querySelector("#summary");
@@ -12,6 +13,53 @@ const leafPreview = document.querySelector("#leafPreview");
 let recognition = null;
 let recording = false;
 let latestSpec = null;
+
+const randomPromptParts = {
+  tree: [
+    "cherry blossom tree",
+    "silver birch tree",
+    "red maple tree",
+    "old olive tree",
+    "weeping willow tree",
+    "Japanese cedar tree",
+    "white magnolia tree",
+    "golden ginkgo tree",
+    "snow-covered pine tree",
+    "ancient oak tree"
+  ],
+  bark: [
+    "pale gray bark with fine horizontal cracks",
+    "deep brown rugged bark with strong vertical ridges",
+    "smooth white bark with dark natural markings",
+    "warm reddish bark with subtle peeling layers",
+    "dark charcoal bark with moss in the grooves",
+    "soft beige bark with gentle fiber detail"
+  ],
+  leaf: [
+    "soft pink flowers mixed with fresh green leaves",
+    "small bright green leaves with a calm spring feeling",
+    "deep red autumn leaves with clear vein detail",
+    "silver green leaves with a muted therapeutic tone",
+    "golden fan-shaped leaves with warm light variation",
+    "dark evergreen needles with dense natural texture"
+  ],
+  mood: [
+    "calm VR therapy garden",
+    "warm and safe healing space",
+    "quiet forest meditation scene",
+    "gentle dreamlike art therapy room",
+    "peaceful sunset environment",
+    "bright morning recovery space"
+  ],
+  style: [
+    "realistic but slightly softened",
+    "natural PBR material friendly",
+    "high detail texture focused",
+    "clean albedo texture style",
+    "Unity HDRP friendly",
+    "not cartoonish, not noisy"
+  ]
+};
 
 const params = new URLSearchParams(window.location.search);
 const apiBase = params.get("api") || "";
@@ -82,6 +130,13 @@ recordButton.addEventListener("click", () => {
   recognition.start();
 });
 
+randomButton.addEventListener("click", () => {
+  requestText.value = buildRandomPrompt();
+  latestSpec = null;
+  summary.textContent = "Random prompt inserted. Refine or generate textures next.";
+  resultLog.textContent = "Ready";
+});
+
 refineButton.addEventListener("click", async () => {
   await withBusy(refineButton, async () => {
     const transcript = cleanTranscript(requestText.value);
@@ -143,8 +198,26 @@ async function request(url, body) {
   return data;
 }
 
+function buildRandomPrompt() {
+  const tree = pick(randomPromptParts.tree);
+  const bark = pick(randomPromptParts.bark);
+  const leaf = pick(randomPromptParts.leaf);
+  const mood = pick(randomPromptParts.mood);
+  const style = pick(randomPromptParts.style);
+  return [
+    `Create a ${tree} for a ${mood}.`,
+    `Bark texture: ${bark}.`,
+    `Leaf texture: ${leaf}.`,
+    `Visual direction: ${style}, suitable for a growing tree animation in Unity.`
+  ].join(" ");
+}
+
+function pick(items) {
+  return items[Math.floor(Math.random() * items.length)];
+}
+
 async function withBusy(button, task) {
-  const buttons = [refineButton, generateButton, recordButton];
+  const buttons = [randomButton, refineButton, generateButton, recordButton];
   try {
     buttons.forEach((item) => {
       if (item !== recordButton || !recording) item.disabled = true;

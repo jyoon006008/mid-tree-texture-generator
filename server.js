@@ -26,7 +26,7 @@ const server = http.createServer(async (req, res) => {
   try {
     const url = new URL(req.url, `http://${req.headers.host}`);
 
-    if (PUBLIC_ACCESS_TOKEN && url.pathname !== "/api/config" && !isAuthorized(req, url)) {
+    if (PUBLIC_ACCESS_TOKEN && requiresAuthorization(url.pathname) && !isAuthorized(req, url)) {
       return sendJson(res, { error: "접속 토큰이 필요합니다." }, 401);
     }
 
@@ -223,6 +223,10 @@ function isAuthorized(req, url) {
   const queryToken = url.searchParams.get("access");
   const headerToken = req.headers["x-mid-access-token"];
   return queryToken === PUBLIC_ACCESS_TOKEN || headerToken === PUBLIC_ACCESS_TOKEN;
+}
+
+function requiresAuthorization(pathname) {
+  return pathname === "/api/refine" || pathname === "/api/generate" || pathname.startsWith("/generated/");
 }
 
 async function parseOpenAiResponse(response) {
