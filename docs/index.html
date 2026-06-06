@@ -1,0 +1,59 @@
+﻿<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MID Tree Texture Generator</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <main class="app">
+      <section class="panel input-panel">
+        <div class="header">
+          <div>
+            <h1>MID Tree Texture Generator</h1>
+            <p id="pathText">寃쎈줈 ?뺤씤 以?/p>
+          </div>
+          <span id="keyStatus" class="status">API</span>
+        </div>
+
+        <div class="recorder">
+          <button id="recordButton" class="icon-button" type="button" title="?뱀쓬 ?쒖옉/?뺤?">??/button>
+          <div>
+            <label for="requestText">?먰븯???섎Т</label>
+            <textarea id="requestText" rows="7" placeholder="?? 踰싰퐙??留롮씠 ? 踰싲굹臾? 諛앹? ?뚭컝??以꾧린, VR 怨듦컙?먯꽌 ?곕쑜?섍쾶 蹂댁씠???먮굦"></textarea>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="refineButton" type="button">?뺣━</button>
+          <button id="generateButton" type="button">?띿뒪泥??앹꽦</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>?뺣━???붿껌</h2>
+        <div id="summary" class="summary">?꾩쭅 ?뺣━???붿껌???놁뒿?덈떎.</div>
+      </section>
+
+      <section class="preview-grid">
+        <article class="preview">
+          <div class="preview-title">Bark</div>
+          <img id="barkPreview" alt="?앹꽦???섎Т 以꾧린 ?띿뒪泥?>
+        </article>
+        <article class="preview">
+          <div class="preview-title">Leaf</div>
+          <img id="leafPreview" alt="?앹꽦???섎춪???띿뒪泥?>
+        </article>
+      </section>
+
+      <section class="panel">
+        <h2>?앹꽦 寃곌낵</h2>
+        <pre id="resultLog">?湲?以?/pre>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
+
