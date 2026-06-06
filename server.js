@@ -26,8 +26,13 @@ const server = http.createServer(async (req, res) => {
   try {
     const url = new URL(req.url, `http://${req.headers.host}`);
 
+    if (req.method === "OPTIONS") {
+      res.writeHead(204, corsHeaders());
+      return res.end();
+    }
+
     if (PUBLIC_ACCESS_TOKEN && requiresAuthorization(url.pathname) && !isAuthorized(req, url)) {
-      return sendJson(res, { error: "접속 토큰이 필요합니다." }, 401);
+      return sendJson(res, { error: "Access token is required." }, 401);
     }
 
     if (req.method === "GET" && url.pathname === "/api/config") {
@@ -91,13 +96,13 @@ async function loadDotEnv(filePath) {
       if (key && !process.env[key]) process.env[key] = value;
     }
   } catch {
-    // .env is optional. Production credentials should be injected by environment.
+    // .env is optional.
   }
 }
 
 async function refineTreeRequest(transcript) {
   assertApiKey();
-  if (!transcript.trim()) throw new Error("녹음 또는 입력된 나무 요청이 비어 있습니다.");
+  if (!transcript.trim()) throw new Error("Tree request is empty.");
 
   const response = await fetch("https://api.openai.com/v1/responses", {
     method: "POST",
@@ -143,11 +148,11 @@ async function refineTreeRequest(transcript) {
 async function generateTextureSet(body) {
   assertApiKey();
 
-  const treeNameKo = String(body.treeNameKo || "사용자 나무").trim();
+  const treeNameKo = String(body.treeNameKo || "custom tree").trim();
   const treeNameEn = String(body.treeNameEn || "custom tree").trim();
   const barkPrompt = String(body.barkPrompt || "").trim();
   const leafPrompt = String(body.leafPrompt || "").trim();
-  if (!barkPrompt || !leafPrompt) throw new Error("barkPrompt와 leafPrompt가 필요합니다.");
+  if (!barkPrompt || !leafPrompt) throw new Error("barkPrompt and leafPrompt are required.");
 
   await fs.mkdir(GENERATED_ROOT, { recursive: true });
   const folderName = `${timestamp()}_${slugify(treeNameEn)}`;
@@ -202,7 +207,7 @@ async function generateImage(prompt) {
   });
   const json = await parseOpenAiResponse(response);
   const image = json.data?.[0]?.b64_json;
-  if (!image) throw new Error("OpenAI 이미지 응답에 b64_json이 없습니다.");
+  if (!image) throw new Error("OpenAI image response did not include b64_json.");
   return image;
 }
 
@@ -215,7 +220,7 @@ function openAiHeaders() {
 
 function assertApiKey() {
   if (!process.env.OPENAI_API_KEY) {
-    throw new Error(".env 또는 환경변수에 OPENAI_API_KEY가 필요합니다.");
+    throw new Error("OPENAI_API_KEY is required in .env or environment variables.");
   }
 }
 
@@ -235,7 +240,7 @@ async function parseOpenAiResponse(response) {
   try {
     json = JSON.parse(text);
   } catch {
-    throw new Error(`OpenAI 응답을 JSON으로 읽지 못했습니다: ${text.slice(0, 300)}`);
+    throw new Error(`Could not parse OpenAI response as JSON: ${text.slice(0, 300)}`);
   }
   if (!response.ok) {
     throw new Error(json.error?.message || `OpenAI API error ${response.status}`);
@@ -251,7 +256,7 @@ function extractResponseText(json) {
       if (content.type === "output_text" && content.text) parts.push(content.text);
     }
   }
-  if (!parts.length) throw new Error("Responses API 응답에서 텍스트를 찾지 못했습니다.");
+  if (!parts.length) throw new Error("Could not find text in Responses API output.");
   return parts.join("");
 }
 
@@ -281,12 +286,12 @@ async function readJson(req) {
 }
 
 function sendJson(res, data, status = 200) {
-  res.writeHead(status, { "Content-Type": "application/json; charset=utf-8" });
+  res.writeHead(status, { ...corsHeaders(), "Content-Type": "application/json; charset=utf-8" });
   res.end(JSON.stringify(data));
 }
 
 function sendText(res, status, text) {
-  res.writeHead(status, { "Content-Type": "text/plain; charset=utf-8" });
+  res.writeHead(status, { ...corsHeaders(), "Content-Type": "text/plain; charset=utf-8" });
   res.end(text);
 }
 
@@ -294,9 +299,17 @@ async function sendFile(res, filePath) {
   try {
     const data = await fs.readFile(filePath);
     const ext = path.extname(filePath).toLowerCase();
-    res.writeHead(200, { "Content-Type": MIME_TYPES[ext] || "application/octet-stream" });
+    res.writeHead(200, { ...corsHeaders(), "Content-Type": MIME_TYPES[ext] || "application/octet-stream" });
     res.end(data);
   } catch {
     sendText(res, 404, "Not found");
   }
+}
+
+function corsHeaders() {
+  return {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type,X-MID-Access-Token"
+  };
 }

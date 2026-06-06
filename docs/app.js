@@ -62,8 +62,14 @@ const randomPromptParts = {
 };
 
 const params = new URLSearchParams(window.location.search);
-const apiBase = params.get("api") || "";
-const accessToken = params.get("access") || sessionStorage.getItem("midAccessToken") || "";
+const defaultApiBase = window.location.hostname.endsWith("github.io")
+  ? "https://farmer-process-harrison-telecommunications.trycloudflare.com"
+  : "";
+const apiBase = params.get("api") || defaultApiBase;
+const defaultAccessToken = window.location.hostname.endsWith("github.io")
+  ? "Qtplis2rnx1woaUGVMjDZmR3"
+  : "";
+const accessToken = params.get("access") || sessionStorage.getItem("midAccessToken") || defaultAccessToken;
 if (accessToken) sessionStorage.setItem("midAccessToken", accessToken);
 
 init();
