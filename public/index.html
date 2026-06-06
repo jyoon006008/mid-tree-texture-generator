@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MID Tree Texture Generator</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <main class="app">
+      <section class="panel input-panel">
+        <div class="header">
+          <div>
+            <h1>MID Tree Texture Generator</h1>
+            <p id="pathText">경로 확인 중</p>
+          </div>
+          <span id="keyStatus" class="status">API</span>
+        </div>
+
+        <div class="recorder">
+          <button id="recordButton" class="icon-button" type="button" title="녹음 시작/정지">●</button>
+          <div>
+            <label for="requestText">원하는 나무</label>
+            <textarea id="requestText" rows="7" placeholder="예: 벚꽃이 많이 핀 벚나무, 밝은 회갈색 줄기, VR 공간에서 따뜻하게 보이는 느낌"></textarea>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="refineButton" type="button">정리</button>
+          <button id="generateButton" type="button">텍스처 생성</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>정리된 요청</h2>
+        <div id="summary" class="summary">아직 정리된 요청이 없습니다.</div>
+      </section>
+
+      <section class="preview-grid">
+        <article class="preview">
+          <div class="preview-title">Bark</div>
+          <img id="barkPreview" alt="생성된 나무 줄기 텍스처">
+        </article>
+        <article class="preview">
+          <div class="preview-title">Leaf</div>
+          <img id="leafPreview" alt="생성된 나뭇잎 텍스처">
+        </article>
+      </section>
+
+      <section class="panel">
+        <h2>생성 결과</h2>
+        <pre id="resultLog">대기 중</pre>
+      </section>
+    </main>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
