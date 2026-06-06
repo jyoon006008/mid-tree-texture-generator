@@ -1,4 +1,4 @@
-﻿const requestText = document.querySelector("#requestText");
+const requestText = document.querySelector("#requestText");
 const recordButton = document.querySelector("#recordButton");
 const refineButton = document.querySelector("#refineButton");
 const generateButton = document.querySelector("#generateButton");
@@ -12,16 +12,28 @@ const leafPreview = document.querySelector("#leafPreview");
 let recognition = null;
 let recording = false;
 let latestSpec = null;
-const params = new URLSearchParams(window.location.search);\nconst apiBase = params.get("api") || "";\nconst accessToken = params.get("access") || sessionStorage.getItem("midAccessToken") || "";
+
+const params = new URLSearchParams(window.location.search);
+const apiBase = params.get("api") || "";
+const accessToken = params.get("access") || sessionStorage.getItem("midAccessToken") || "";
 if (accessToken) sessionStorage.setItem("midAccessToken", accessToken);
 
 init();
 
 async function init() {
-  const config = await request("/api/config");
-  pathText.textContent = `????꾩튂: ${config.generatedRoot}`;
-  keyStatus.textContent = config.hasApiKey ? "API 以鍮? : "API ???놁쓬";
-  keyStatus.classList.add(config.hasApiKey ? "ready" : "missing");
+  try {
+    const config = await request("/api/config");
+    pathText.textContent = config.generatedRoot
+      ? `Output path: ${config.generatedRoot}`
+      : "API connection ready";
+    keyStatus.textContent = config.hasApiKey ? "API Ready" : "API Missing";
+    keyStatus.classList.add(config.hasApiKey ? "ready" : "missing");
+  } catch (error) {
+    pathText.textContent = apiBase
+      ? `API connection failed: ${error.message}`
+      : "Static preview only. Add ?api=SERVER_URL to enable generation.";
+    keyStatus.textContent = "Preview";
+  }
   setupSpeechRecognition();
 }
 
@@ -29,7 +41,7 @@ function setupSpeechRecognition() {
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SpeechRecognition) {
     recordButton.disabled = true;
-    recordButton.title = "??釉뚮씪?곗????뚯꽦 ?몄떇??吏?먰븯吏 ?딆뒿?덈떎.";
+    recordButton.title = "Speech recognition is not supported in this browser.";
     return;
   }
 
@@ -46,8 +58,8 @@ function setupSpeechRecognition() {
       if (event.results[i].isFinal) finalText += text;
       else interimText += text;
     }
-    const base = requestText.value.replace(/\n?\[留먰븯??以?].*$/s, "").trim();
-    requestText.value = [base, finalText, interimText ? `[留먰븯??以? ${interimText}` : ""]
+    const base = requestText.value.replace(/\n?\[Speaking\].*$/s, "").trim();
+    requestText.value = [base, finalText, interimText ? `[Speaking] ${interimText}` : ""]
       .filter(Boolean)
       .join("\n");
   };
@@ -64,7 +76,7 @@ recordButton.addEventListener("click", () => {
     recognition.stop();
     return;
   }
-  requestText.value = requestText.value.replace(/\n?\[留먰븯??以?].*$/s, "").trim();
+  requestText.value = requestText.value.replace(/\n?\[Speaking\].*$/s, "").trim();
   recording = true;
   recordButton.classList.add("recording");
   recognition.start();
@@ -75,7 +87,7 @@ refineButton.addEventListener("click", async () => {
     const transcript = cleanTranscript(requestText.value);
     latestSpec = await request("/api/refine", { transcript });
     renderSpec(latestSpec);
-    resultLog.textContent = "?뺣━ ?꾨즺";
+    resultLog.textContent = "Refined.";
   });
 });
 
@@ -92,8 +104,8 @@ generateButton.addEventListener("click", async () => {
       sourceRequest: cleanTranscript(requestText.value)
     });
 
-    barkPreview.src = `${result.preview.bark}?t=${Date.now()}`;
-    leafPreview.src = `${result.preview.leaf}?t=${Date.now()}`;
+    barkPreview.src = `${apiBase}${result.preview.bark}?t=${Date.now()}`;
+    leafPreview.src = `${apiBase}${result.preview.leaf}?t=${Date.now()}`;
     resultLog.textContent = JSON.stringify({
       outputDir: result.outputDir,
       folderName: result.folderName,
@@ -104,8 +116,8 @@ generateButton.addEventListener("click", async () => {
 
 function renderSpec(spec) {
   summary.textContent = [
-    `?섎Т: ${spec.treeNameKo} (${spec.treeNameEn})`,
-    `?ㅻ챸: ${spec.descriptionKo}`,
+    `Tree: ${spec.treeNameKo} (${spec.treeNameEn})`,
+    `Description: ${spec.descriptionKo}`,
     "",
     `Bark prompt: ${spec.barkPrompt}`,
     "",
@@ -114,7 +126,7 @@ function renderSpec(spec) {
 }
 
 function cleanTranscript(value) {
-  return value.replace(/\n?\[留먰븯??以?].*$/s, "").trim();
+  return value.replace(/\n?\[Speaking\].*$/s, "").trim();
 }
 
 async function request(url, body) {
@@ -127,7 +139,7 @@ async function request(url, body) {
     body: body ? JSON.stringify(body) : undefined
   });
   const data = await response.json();
-  if (!response.ok) throw new Error(data.error || "?붿껌 ?ㅽ뙣");
+  if (!response.ok) throw new Error(data.error || "Request failed");
   return data;
 }
 
@@ -137,14 +149,13 @@ async function withBusy(button, task) {
     buttons.forEach((item) => {
       if (item !== recordButton || !recording) item.disabled = true;
     });
-    resultLog.textContent = "泥섎━ 以?;
+    resultLog.textContent = "Processing...";
     await task();
   } catch (error) {
-    resultLog.textContent = `?ㅻ쪟: ${error.message}`;
+    resultLog.textContent = `Error: ${error.message}`;
   } finally {
     buttons.forEach((item) => {
       if (item !== recordButton || recognition) item.disabled = false;
     });
   }
 }
-

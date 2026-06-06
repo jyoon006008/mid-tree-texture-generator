@@ -12,16 +12,28 @@ const leafPreview = document.querySelector("#leafPreview");
 let recognition = null;
 let recording = false;
 let latestSpec = null;
-const accessToken = new URLSearchParams(window.location.search).get("access") || sessionStorage.getItem("midAccessToken") || "";
+
+const params = new URLSearchParams(window.location.search);
+const apiBase = params.get("api") || "";
+const accessToken = params.get("access") || sessionStorage.getItem("midAccessToken") || "";
 if (accessToken) sessionStorage.setItem("midAccessToken", accessToken);
 
 init();
 
 async function init() {
-  const config = await request("/api/config");
-  pathText.textContent = `저장 위치: ${config.generatedRoot}`;
-  keyStatus.textContent = config.hasApiKey ? "API 준비" : "API 키 없음";
-  keyStatus.classList.add(config.hasApiKey ? "ready" : "missing");
+  try {
+    const config = await request("/api/config");
+    pathText.textContent = config.generatedRoot
+      ? `Output path: ${config.generatedRoot}`
+      : "API connection ready";
+    keyStatus.textContent = config.hasApiKey ? "API Ready" : "API Missing";
+    keyStatus.classList.add(config.hasApiKey ? "ready" : "missing");
+  } catch (error) {
+    pathText.textContent = apiBase
+      ? `API connection failed: ${error.message}`
+      : "Static preview only. Add ?api=SERVER_URL to enable generation.";
+    keyStatus.textContent = "Preview";
+  }
   setupSpeechRecognition();
 }
 
@@ -29,7 +41,7 @@ function setupSpeechRecognition() {
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SpeechRecognition) {
     recordButton.disabled = true;
-    recordButton.title = "이 브라우저는 음성 인식을 지원하지 않습니다.";
+    recordButton.title = "Speech recognition is not supported in this browser.";
     return;
   }
 
@@ -46,8 +58,8 @@ function setupSpeechRecognition() {
       if (event.results[i].isFinal) finalText += text;
       else interimText += text;
     }
-    const base = requestText.value.replace(/\n?\[말하는 중\].*$/s, "").trim();
-    requestText.value = [base, finalText, interimText ? `[말하는 중] ${interimText}` : ""]
+    const base = requestText.value.replace(/\n?\[Speaking\].*$/s, "").trim();
+    requestText.value = [base, finalText, interimText ? `[Speaking] ${interimText}` : ""]
       .filter(Boolean)
       .join("\n");
   };
@@ -64,7 +76,7 @@ recordButton.addEventListener("click", () => {
     recognition.stop();
     return;
   }
-  requestText.value = requestText.value.replace(/\n?\[말하는 중\].*$/s, "").trim();
+  requestText.value = requestText.value.replace(/\n?\[Speaking\].*$/s, "").trim();
   recording = true;
   recordButton.classList.add("recording");
   recognition.start();
@@ -75,7 +87,7 @@ refineButton.addEventListener("click", async () => {
     const transcript = cleanTranscript(requestText.value);
     latestSpec = await request("/api/refine", { transcript });
     renderSpec(latestSpec);
-    resultLog.textContent = "정리 완료";
+    resultLog.textContent = "Refined.";
   });
 });
 
@@ -92,8 +104,8 @@ generateButton.addEventListener("click", async () => {
       sourceRequest: cleanTranscript(requestText.value)
     });
 
-    barkPreview.src = `${result.preview.bark}?t=${Date.now()}`;
-    leafPreview.src = `${result.preview.leaf}?t=${Date.now()}`;
+    barkPreview.src = `${apiBase}${result.preview.bark}?t=${Date.now()}`;
+    leafPreview.src = `${apiBase}${result.preview.leaf}?t=${Date.now()}`;
     resultLog.textContent = JSON.stringify({
       outputDir: result.outputDir,
       folderName: result.folderName,
@@ -104,8 +116,8 @@ generateButton.addEventListener("click", async () => {
 
 function renderSpec(spec) {
   summary.textContent = [
-    `나무: ${spec.treeNameKo} (${spec.treeNameEn})`,
-    `설명: ${spec.descriptionKo}`,
+    `Tree: ${spec.treeNameKo} (${spec.treeNameEn})`,
+    `Description: ${spec.descriptionKo}`,
     "",
     `Bark prompt: ${spec.barkPrompt}`,
     "",
@@ -114,11 +126,11 @@ function renderSpec(spec) {
 }
 
 function cleanTranscript(value) {
-  return value.replace(/\n?\[말하는 중\].*$/s, "").trim();
+  return value.replace(/\n?\[Speaking\].*$/s, "").trim();
 }
 
 async function request(url, body) {
-  const response = await fetch(url, {
+  const response = await fetch(`${apiBase}${url}`, {
     method: body ? "POST" : "GET",
     headers: {
       ...(body ? { "Content-Type": "application/json" } : {}),
@@ -127,7 +139,7 @@ async function request(url, body) {
     body: body ? JSON.stringify(body) : undefined
   });
   const data = await response.json();
-  if (!response.ok) throw new Error(data.error || "요청 실패");
+  if (!response.ok) throw new Error(data.error || "Request failed");
   return data;
 }
 
@@ -137,10 +149,10 @@ async function withBusy(button, task) {
     buttons.forEach((item) => {
       if (item !== recordButton || !recording) item.disabled = true;
     });
-    resultLog.textContent = "처리 중";
+    resultLog.textContent = "Processing...";
     await task();
   } catch (error) {
-    resultLog.textContent = `오류: ${error.message}`;
+    resultLog.textContent = `Error: ${error.message}`;
   } finally {
     buttons.forEach((item) => {
       if (item !== recordButton || recognition) item.disabled = false;

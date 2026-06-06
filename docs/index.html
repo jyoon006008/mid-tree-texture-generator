@@ -1,5 +1,5 @@
-﻿<!doctype html>
-<html lang="ko">
+<!doctype html>
+<html lang="en">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -12,48 +12,47 @@
         <div class="header">
           <div>
             <h1>MID Tree Texture Generator</h1>
-            <p id="pathText">寃쎈줈 ?뺤씤 以?/p>
+            <p id="pathText">Checking API connection</p>
           </div>
           <span id="keyStatus" class="status">API</span>
         </div>
 
         <div class="recorder">
-          <button id="recordButton" class="icon-button" type="button" title="?뱀쓬 ?쒖옉/?뺤?">??/button>
+          <button id="recordButton" class="icon-button" type="button" title="Start or stop recording">●</button>
           <div>
-            <label for="requestText">?먰븯???섎Т</label>
-            <textarea id="requestText" rows="7" placeholder="?? 踰싰퐙??留롮씠 ? 踰싲굹臾? 諛앹? ?뚭컝??以꾧린, VR 怨듦컙?먯꽌 ?곕쑜?섍쾶 蹂댁씠???먮굦"></textarea>
+            <label for="requestText">Tree request</label>
+            <textarea id="requestText" rows="7" placeholder="Example: a cherry blossom tree with many flowers, warm pale gray bark, suitable for a calm VR space"></textarea>
           </div>
         </div>
 
         <div class="actions">
-          <button id="refineButton" type="button">?뺣━</button>
-          <button id="generateButton" type="button">?띿뒪泥??앹꽦</button>
+          <button id="refineButton" type="button">Refine</button>
+          <button id="generateButton" type="button">Generate Textures</button>
         </div>
       </section>
 
       <section class="panel">
-        <h2>?뺣━???붿껌</h2>
-        <div id="summary" class="summary">?꾩쭅 ?뺣━???붿껌???놁뒿?덈떎.</div>
+        <h2>Refined Request</h2>
+        <div id="summary" class="summary">No refined request yet.</div>
       </section>
 
       <section class="preview-grid">
         <article class="preview">
           <div class="preview-title">Bark</div>
-          <img id="barkPreview" alt="?앹꽦???섎Т 以꾧린 ?띿뒪泥?>
+          <img id="barkPreview" alt="Generated bark texture">
         </article>
         <article class="preview">
           <div class="preview-title">Leaf</div>
-          <img id="leafPreview" alt="?앹꽦???섎춪???띿뒪泥?>
+          <img id="leafPreview" alt="Generated leaf texture">
         </article>
       </section>
 
       <section class="panel">
-        <h2>?앹꽦 寃곌낵</h2>
-        <pre id="resultLog">?湲?以?/pre>
+        <h2>Result</h2>
+        <pre id="resultLog">Ready</pre>
       </section>
     </main>
 
     <script src="./app.js"></script>
   </body>
 </html>
-

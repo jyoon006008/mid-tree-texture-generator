@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ko">
+<html lang="en">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -12,44 +12,44 @@
         <div class="header">
           <div>
             <h1>MID Tree Texture Generator</h1>
-            <p id="pathText">경로 확인 중</p>
+            <p id="pathText">Checking output path</p>
           </div>
           <span id="keyStatus" class="status">API</span>
         </div>
 
         <div class="recorder">
-          <button id="recordButton" class="icon-button" type="button" title="녹음 시작/정지">●</button>
+          <button id="recordButton" class="icon-button" type="button" title="Start or stop recording">●</button>
           <div>
-            <label for="requestText">원하는 나무</label>
-            <textarea id="requestText" rows="7" placeholder="예: 벚꽃이 많이 핀 벚나무, 밝은 회갈색 줄기, VR 공간에서 따뜻하게 보이는 느낌"></textarea>
+            <label for="requestText">Tree request</label>
+            <textarea id="requestText" rows="7" placeholder="Example: a cherry blossom tree with many flowers, warm pale gray bark, suitable for a calm VR space"></textarea>
           </div>
         </div>
 
         <div class="actions">
-          <button id="refineButton" type="button">정리</button>
-          <button id="generateButton" type="button">텍스처 생성</button>
+          <button id="refineButton" type="button">Refine</button>
+          <button id="generateButton" type="button">Generate Textures</button>
         </div>
       </section>
 
       <section class="panel">
-        <h2>정리된 요청</h2>
-        <div id="summary" class="summary">아직 정리된 요청이 없습니다.</div>
+        <h2>Refined Request</h2>
+        <div id="summary" class="summary">No refined request yet.</div>
       </section>
 
       <section class="preview-grid">
         <article class="preview">
           <div class="preview-title">Bark</div>
-          <img id="barkPreview" alt="생성된 나무 줄기 텍스처">
+          <img id="barkPreview" alt="Generated bark texture">
         </article>
         <article class="preview">
           <div class="preview-title">Leaf</div>
-          <img id="leafPreview" alt="생성된 나뭇잎 텍스처">
+          <img id="leafPreview" alt="Generated leaf texture">
         </article>
       </section>
 
       <section class="panel">
-        <h2>생성 결과</h2>
-        <pre id="resultLog">대기 중</pre>
+        <h2>Result</h2>
+        <pre id="resultLog">Ready</pre>
       </section>
     </main>
 
