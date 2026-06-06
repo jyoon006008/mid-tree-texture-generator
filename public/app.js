@@ -12,6 +12,8 @@ const leafPreview = document.querySelector("#leafPreview");
 let recognition = null;
 let recording = false;
 let latestSpec = null;
+const accessToken = new URLSearchParams(window.location.search).get("access") || sessionStorage.getItem("midAccessToken") || "";
+if (accessToken) sessionStorage.setItem("midAccessToken", accessToken);
 
 init();
 
@@ -118,7 +120,10 @@ function cleanTranscript(value) {
 async function request(url, body) {
   const response = await fetch(url, {
     method: body ? "POST" : "GET",
-    headers: body ? { "Content-Type": "application/json" } : undefined,
+    headers: {
+      ...(body ? { "Content-Type": "application/json" } : {}),
+      ...(accessToken ? { "X-MID-Access-Token": accessToken } : {})
+    },
     body: body ? JSON.stringify(body) : undefined
   });
   const data = await response.json();

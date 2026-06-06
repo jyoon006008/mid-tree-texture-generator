@@ -12,6 +12,7 @@ const PORT = Number(process.env.PORT || 5177);
 const TREE_TYPE_ROOT = process.env.TREE_TYPE_ROOT || "C:\\Users\\junwo\\Desktop\\tree_type";
 const GENERATED_ROOT = path.join(TREE_TYPE_ROOT, "generated");
 const PUBLIC_ROOT = path.join(__dirname, "public");
+const PUBLIC_ACCESS_TOKEN = process.env.PUBLIC_ACCESS_TOKEN || "";
 
 const MIME_TYPES = {
   ".html": "text/html; charset=utf-8",
@@ -25,11 +26,17 @@ const server = http.createServer(async (req, res) => {
   try {
     const url = new URL(req.url, `http://${req.headers.host}`);
 
+    if (PUBLIC_ACCESS_TOKEN && url.pathname !== "/api/config" && !isAuthorized(req, url)) {
+      return sendJson(res, { error: "접속 토큰이 필요합니다." }, 401);
+    }
+
     if (req.method === "GET" && url.pathname === "/api/config") {
       return sendJson(res, {
         treeTypeRoot: TREE_TYPE_ROOT,
         generatedRoot: GENERATED_ROOT,
-        hasApiKey: Boolean(process.env.OPENAI_API_KEY)
+        hasApiKey: Boolean(process.env.OPENAI_API_KEY),
+        requiresAccessToken: Boolean(PUBLIC_ACCESS_TOKEN),
+        accessGranted: !PUBLIC_ACCESS_TOKEN || isAuthorized(req, url)
       });
     }
 
@@ -210,6 +217,12 @@ function assertApiKey() {
   if (!process.env.OPENAI_API_KEY) {
     throw new Error(".env 또는 환경변수에 OPENAI_API_KEY가 필요합니다.");
   }
+}
+
+function isAuthorized(req, url) {
+  const queryToken = url.searchParams.get("access");
+  const headerToken = req.headers["x-mid-access-token"];
+  return queryToken === PUBLIC_ACCESS_TOKEN || headerToken === PUBLIC_ACCESS_TOKEN;
 }
 
 async function parseOpenAiResponse(response) {
