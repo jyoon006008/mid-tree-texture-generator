@@ -1,5 +1,6 @@
 const requestText = document.querySelector("#requestText");
 const recordButton = document.querySelector("#recordButton");
+const speechLanguage = document.querySelector("#speechLanguage");
 const randomButton = document.querySelector("#randomButton");
 const refineButton = document.querySelector("#refineButton");
 const generateButton = document.querySelector("#generateButton");
@@ -100,7 +101,7 @@ function setupSpeechRecognition() {
   }
 
   recognition = new SpeechRecognition();
-  recognition.lang = "ko-KR";
+  recognition.lang = speechLanguage.value;
   recognition.continuous = true;
   recognition.interimResults = true;
 
@@ -131,9 +132,16 @@ recordButton.addEventListener("click", () => {
     return;
   }
   requestText.value = requestText.value.replace(/\n?\[Speaking\].*$/s, "").trim();
+  recognition.lang = speechLanguage.value;
   recording = true;
   recordButton.classList.add("recording");
   recognition.start();
+});
+
+speechLanguage.addEventListener("change", () => {
+  if (recognition && recording) {
+    recognition.stop();
+  }
 });
 
 randomButton.addEventListener("click", () => {

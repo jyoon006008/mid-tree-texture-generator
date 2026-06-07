@@ -31,7 +31,7 @@ const server = http.createServer(async (req, res) => {
       return res.end();
     }
 
-    if (PUBLIC_ACCESS_TOKEN && requiresAuthorization(url.pathname) && !isAuthorized(req, url)) {
+    if (PUBLIC_ACCESS_TOKEN && requiresAuthorization(url.pathname) && !isLocalRequest(req) && !isAuthorized(req, url)) {
       return sendJson(res, { error: "Access token is required." }, 401);
     }
 
@@ -41,7 +41,7 @@ const server = http.createServer(async (req, res) => {
         generatedRoot: GENERATED_ROOT,
         hasApiKey: Boolean(process.env.OPENAI_API_KEY),
         requiresAccessToken: Boolean(PUBLIC_ACCESS_TOKEN),
-        accessGranted: !PUBLIC_ACCESS_TOKEN || isAuthorized(req, url)
+        accessGranted: !PUBLIC_ACCESS_TOKEN || isLocalRequest(req) || isAuthorized(req, url)
       });
     }
 
@@ -228,6 +228,11 @@ function isAuthorized(req, url) {
   const queryToken = url.searchParams.get("access");
   const headerToken = req.headers["x-mid-access-token"];
   return queryToken === PUBLIC_ACCESS_TOKEN || headerToken === PUBLIC_ACCESS_TOKEN;
+}
+
+function isLocalRequest(req) {
+  const host = String(req.headers.host || "").split(":")[0].toLowerCase();
+  return host === "localhost" || host === "127.0.0.1" || host === "::1" || host === "[::1]";
 }
 
 function requiresAuthorization(pathname) {
