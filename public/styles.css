@@ -108,35 +108,6 @@ label {
   margin-bottom: 8px;
 }
 
-.field-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.field-row label {
-  margin-bottom: 0;
-}
-
-.language-control {
-  display: inline-flex;
-  gap: 8px;
-  align-items: center;
-  color: #526052;
-  font-size: 13px;
-}
-
-select {
-  border: 1px solid #bcc7ba;
-  border-radius: 8px;
-  padding: 7px 10px;
-  background: #fff;
-  color: #17211a;
-  font: inherit;
-}
-
 textarea {
   width: 100%;
   resize: vertical;
