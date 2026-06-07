@@ -199,6 +199,19 @@ button:disabled {
   background: #eef1ed;
 }
 
+.leaf-preview img {
+  aspect-ratio: 2 / 3;
+  object-fit: contain;
+  background-color: #eef1ed;
+  background-image:
+    linear-gradient(45deg, rgba(82, 96, 82, 0.12) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(82, 96, 82, 0.12) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(82, 96, 82, 0.12) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(82, 96, 82, 0.12) 75%);
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+  background-size: 20px 20px;
+}
+
 pre {
   margin: 0;
   white-space: pre-wrap;

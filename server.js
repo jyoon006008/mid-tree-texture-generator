@@ -116,7 +116,10 @@ async function refineTreeRequest(transcript) {
         },
         {
           role: "user",
-          content: `User request: ${transcript}\nReturn JSON with keys: treeNameKo, treeNameEn, descriptionKo, barkPrompt, leafPrompt. Prompts must describe seamless square PBR-friendly texture images for a Unity tree material. No labels, no text, no objects, no background scene.`
+          content: `User request: ${transcript}
+Return JSON with keys: treeNameKo, treeNameEn, descriptionKo, barkPrompt, leafPrompt.
+barkPrompt must describe a seamless square PBR-friendly bark texture for a Unity trunk material.
+leafPrompt must describe one isolated vertical botanical leaf asset or leaf branch sprite, not a repeating pattern. It must start from the bottom edge of the canvas, grow upward from a visible stem or base, be centered, occupy most of a portrait canvas, and have no background. No labels, no text, no scene.`
         }
       ],
       text: {
@@ -159,8 +162,18 @@ async function generateTextureSet(body) {
   const outputDir = path.join(GENERATED_ROOT, folderName);
   await fs.mkdir(outputDir, { recursive: true });
 
-  const bark = await generateImage(`${barkPrompt}. Seamless tileable square texture, clean albedo map, realistic bark surface, no shadows from a scene, no text.`);
-  const leaf = await generateImage(`${leafPrompt}. Seamless tileable square texture, clean albedo map, realistic leaf cluster surface, no branch silhouette, no text.`);
+  const bark = await generateImage({
+    prompt: `${barkPrompt}. Seamless tileable square texture, clean albedo map, realistic bark surface, no shadows from a scene, no text.`,
+    size: "1024x1024",
+    background: "opaque",
+    quality: "medium"
+  });
+  const leaf = await generateImage({
+    prompt: `${leafPrompt}. Create a single isolated vertical plant cutout sprite for Unity. Transparent background alpha PNG. The stem or base must begin at the bottom edge of the image and the leaf shape must extend upward. Centered composition, full height, portrait asset, no repeated tile pattern, no carpet of leaves, no colored background, no shadow, no ground, no text.`,
+    size: "1024x1536",
+    background: "transparent",
+    quality: "high"
+  });
 
   await fs.writeFile(path.join(outputDir, "bark_texture.png"), Buffer.from(bark, "base64"));
   await fs.writeFile(path.join(outputDir, "leaf_texture.png"), Buffer.from(leaf, "base64"));
@@ -192,17 +205,17 @@ async function generateTextureSet(body) {
   };
 }
 
-async function generateImage(prompt) {
+async function generateImage({ prompt, size, background, quality }) {
   const response = await fetch("https://api.openai.com/v1/images/generations", {
     method: "POST",
     headers: openAiHeaders(),
     body: JSON.stringify({
       model: "gpt-image-1",
       prompt,
-      size: "1024x1024",
-      quality: "medium",
+      size,
+      quality,
       output_format: "png",
-      background: "opaque"
+      background
     })
   });
   const json = await parseOpenAiResponse(response);

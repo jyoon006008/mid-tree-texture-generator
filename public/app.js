@@ -37,12 +37,12 @@ const randomPromptParts = {
     "soft beige bark with gentle fiber detail"
   ],
   leaf: [
-    "soft pink flowers mixed with fresh green leaves",
-    "small bright green leaves with a calm spring feeling",
-    "deep red autumn leaves with clear vein detail",
-    "silver green leaves with a muted therapeutic tone",
-    "golden fan-shaped leaves with warm light variation",
-    "dark evergreen needles with dense natural texture"
+    "a single green compound leaf branch rising from a thin stem at the bottom",
+    "one vertical maple leaf stem with red autumn leaves starting from the bottom edge",
+    "a narrow willow leaf sprig growing upward from a visible bottom stem",
+    "one silver green leaf branch with clear veins and a transparent cutout shape",
+    "a golden ginkgo leaf sprig with stems beginning at the bottom edge",
+    "one evergreen needle branch rising vertically from the bottom"
   ],
   mood: [
     "calm VR therapy garden",
@@ -141,7 +141,7 @@ speechLanguage.addEventListener("change", () => {
 randomButton.addEventListener("click", () => {
   requestText.value = buildRandomPrompt();
   latestSpec = null;
-  summary.textContent = "Random prompt inserted. Refine or generate textures next.";
+  summary.textContent = "Random prompt inserted. Refine or generate assets next.";
   resultLog.textContent = "Ready";
 });
 
@@ -215,7 +215,7 @@ function buildRandomPrompt() {
   return [
     `Create a ${tree} for a ${mood}.`,
     `Bark texture: ${bark}.`,
-    `Leaf texture: ${leaf}.`,
+    `Leaf sprite: ${leaf}, isolated on a transparent background, base aligned to the bottom edge.`,
     `Visual direction: ${style}, suitable for a growing tree animation in Unity.`
   ].join(" ");
 }
