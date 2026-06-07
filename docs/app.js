@@ -17,99 +17,24 @@ let activeSpeechTexts = new Map();
 let activeRecognizerIndex = 0;
 let recognitionSwitchTimer = null;
 
-const randomPromptParts = {
-  tree: [
-    "cherry blossom tree",
-    "silver birch tree",
-    "red maple tree",
-    "old olive tree",
-    "weeping willow tree",
-    "Japanese cedar tree",
-    "white magnolia tree",
-    "golden ginkgo tree",
-    "snow-covered pine tree",
-    "ancient oak tree"
-  ],
-  bark: [
-    "pale gray bark with fine horizontal cracks",
-    "deep brown rugged bark with strong vertical ridges",
-    "smooth white bark with dark natural markings",
-    "warm reddish bark with subtle peeling layers",
-    "dark charcoal bark with moss in the grooves",
-    "soft beige bark with gentle fiber detail"
-  ],
-  leaf: [
-    "a single green compound leaf branch rising from a thin stem at the bottom",
-    "one vertical maple leaf stem with red autumn leaves starting from the bottom edge",
-    "a narrow willow leaf sprig growing upward from a visible bottom stem",
-    "one silver green leaf branch with clear veins and a transparent cutout shape",
-    "a golden ginkgo leaf sprig with stems beginning at the bottom edge",
-    "one evergreen needle branch rising vertically from the bottom"
-  ],
-  mood: [
-    "calm VR therapy garden",
-    "warm and safe healing space",
-    "quiet forest meditation scene",
-    "gentle dreamlike art therapy room",
-    "peaceful sunset environment",
-    "bright morning recovery space"
-  ],
-  style: [
-    "realistic but slightly softened",
-    "natural PBR material friendly",
-    "high detail texture focused",
-    "clean albedo texture style",
-    "Unity HDRP friendly",
-    "not cartoonish, not noisy"
-  ]
-};
-
-const randomPromptPartsKo = {
-  tree: [
-    "벚꽃이 풍성한 벚나무",
-    "초록 잎이 많은 자작나무",
-    "붉은 단풍나무",
-    "오래된 올리브나무",
-    "가느다란 수양버들",
-    "일본 삼나무",
-    "흰 목련나무",
-    "황금빛 은행나무",
-    "눈이 살짝 얹힌 소나무",
-    "오래된 참나무"
-  ],
-  bark: [
-    "밝은 회갈색 줄기에 가는 수평 균열",
-    "짙은 갈색의 거친 세로 홈",
-    "하얗고 매끈한 껍질에 자연스러운 검은 무늬",
-    "붉은 갈색 껍질에 얇게 벗겨진 결",
-    "어두운 숯빛 줄기에 홈 사이 이끼 느낌",
-    "부드러운 베이지색 줄기와 섬세한 섬유질"
-  ],
-  leaf: [
-    "하단 줄기에서 시작해 위로 자라는 초록색 잎가지",
-    "이미지 하단에서 시작하는 붉은 단풍 잎 스프라이트",
-    "아래쪽 줄기에서 위로 뻗는 가느다란 버들잎 가지",
-    "투명 배경에 선명한 잎맥이 보이는 은녹색 잎가지",
-    "하단 기부에서 시작하는 황금빛 은행잎 가지",
-    "아래에서 위로 자라는 세로형 침엽수 잎가지"
-  ],
-  mood: [
-    "차분한 VR 치유 정원",
-    "따뜻하고 안전한 회복 공간",
-    "조용한 숲 명상 장면",
-    "몽환적인 아트 테라피 공간",
-    "평화로운 노을 환경",
-    "밝은 아침 회복 공간"
-  ],
-  style: [
-    "현실적이지만 부드러운 느낌",
-    "Unity PBR 소재에 어울리는 자연스러운 표현",
-    "디테일이 살아있는 고해상도 에셋",
-    "깨끗한 알베도 중심 스타일",
-    "Unity HDRP에 어울리는 스타일",
-    "만화적이지 않고 과하게 복잡하지 않은 스타일"
-  ]
-};
+const randomVisitorPrompts = [
+  "A warm cherry blossom tree that feels safe and soft.",
+  "An old oak tree that looks calm, strong, and protective.",
+  "A quiet willow tree with long leaves, like a peaceful resting place.",
+  "A bright ginkgo tree that feels hopeful and warm.",
+  "A dark pine tree with a deep forest mood.",
+  "A silver birch tree that feels clean, light, and gentle.",
+  "A red maple tree that feels emotional but comforting.",
+  "A white magnolia tree with a soft and dreamlike mood.",
+  "\uB530\uB73B\uD558\uACE0 \uC548\uC804\uD55C \uB290\uB08C\uC758 \uBC9A\uB098\uBB34\uB97C \uB9CC\uB4E4\uC5B4\uC918.",
+  "\uC870\uC6A9\uD558\uACE0 \uB2E8\uB2E8\uD55C \uB290\uB08C\uC758 \uC624\uB798\uB41C \uCC38\uB098\uBB34\uAC00 \uC88B\uC544.",
+  "\uD3B8\uC548\uD558\uAC8C \uC26C\uACE0 \uC2F6\uC740 \uB290\uB08C\uC758 \uC218\uC591\uBC84\uB4E4\uC744 \uC6D0\uD574.",
+  "\uD76C\uB9DD\uC801\uC774\uACE0 \uBC1D\uC740 \uC740\uD589\uB098\uBB34\uB97C \uB9CC\uB4E4\uC5B4\uC918.",
+  "\uAE4A\uC740 \uC232\uC18D\uCC98\uB7FC \uCC28\uBD84\uD55C \uC18C\uB098\uBB34\uB97C \uBCF4\uACE0 \uC2F6\uC5B4.",
+  "\uAE68\uB057\uD558\uACE0 \uBD80\uB4DC\uB7EC\uC6B4 \uC790\uC791\uB098\uBB34 \uB290\uB08C\uC774\uBA74 \uC88B\uACA0\uC5B4.",
+  "\uBD89\uC740 \uB2E8\uD48D\uB098\uBB34\uCC98\uB7FC \uAC10\uC131\uC801\uC774\uC9C0\uB9CC \uD3EC\uADFC\uD55C \uB290\uB08C.",
+  "\uD558\uC580 \uBAA9\uB828\uB098\uBB34\uCC98\uB7FC \uBD80\uB4DC\uB7FD\uACE0 \uBABD\uD658\uC801\uC778 \uB098\uBB34."
+];
 
 const params = new URLSearchParams(window.location.search);
 const defaultApiBase = window.location.hostname.endsWith("github.io")
@@ -168,9 +93,9 @@ recordButton.addEventListener("click", () => {
 });
 
 randomButton.addEventListener("click", () => {
-  requestText.value = buildRandomPrompt();
+  requestText.value = pick(randomVisitorPrompts);
   latestSpec = null;
-  summary.textContent = "Random prompt inserted. Refine or generate assets next.";
+  summary.textContent = "Random visitor-style request inserted.";
   resultLog.textContent = "Ready";
 });
 
@@ -233,36 +158,6 @@ async function request(url, body) {
   const data = await response.json();
   if (!response.ok) throw new Error(data.error || "Request failed");
   return data;
-}
-
-function buildRandomPrompt() {
-  if (Math.random() < 0.5) return buildRandomPromptKo();
-
-  const tree = pick(randomPromptParts.tree);
-  const bark = pick(randomPromptParts.bark);
-  const leaf = pick(randomPromptParts.leaf);
-  const mood = pick(randomPromptParts.mood);
-  const style = pick(randomPromptParts.style);
-  return [
-    `Create a ${tree} for a ${mood}.`,
-    `Bark texture: ${bark}.`,
-    `Leaf sprite: ${leaf}, isolated on a transparent background, base aligned to the bottom edge.`,
-    `Visual direction: ${style}, suitable for a growing tree animation in Unity.`
-  ].join(" ");
-}
-
-function buildRandomPromptKo() {
-  const tree = pick(randomPromptPartsKo.tree);
-  const bark = pick(randomPromptPartsKo.bark);
-  const leaf = pick(randomPromptPartsKo.leaf);
-  const mood = pick(randomPromptPartsKo.mood);
-  const style = pick(randomPromptPartsKo.style);
-  return [
-    `${mood}에 어울리는 ${tree}를 만들어줘.`,
-    `나무 몸통 텍스처는 ${bark} 느낌이면 좋겠어.`,
-    `나뭇잎 스프라이트는 ${leaf} 형태이고, 투명 배경 PNG로 이미지 하단에서 시작해야 해.`,
-    `전체 방향은 ${style}이고 Unity 성장 애니메이션에 바로 쓰기 좋게 해줘.`
-  ].join(" ");
 }
 
 function pick(items) {
